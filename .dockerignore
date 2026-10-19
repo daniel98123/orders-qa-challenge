@@ -1,0 +1,11 @@
+target
+frontend
+e2e
+ai-tools
+docs
+.github
+.git
+.idea
+.vscode
+**/node_modules
+*.md

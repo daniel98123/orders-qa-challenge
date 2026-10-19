@@ -3,7 +3,8 @@ FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /workspace
 # Capa de dependencias cacheable: solo se invalida si cambia el pom
 COPY pom.xml .
-RUN mvn -B -q dependency:go-offline
+# Reintentos ante fallos transitorios del repositorio (p. ej. 502 de Maven Central)
+RUN for i in 1 2 3; do mvn -B -q dependency:go-offline && exit 0; echo "Reintento $i"; sleep 10; done; exit 1
 COPY src ./src
 # Las pruebas se ejecutan en el pipeline (etapas dedicadas con quality gates);
 # aquí solo se empaqueta para mantener la imagen reproducible y rápida de construir.

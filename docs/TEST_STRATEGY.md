@@ -90,6 +90,10 @@ El mutation testing complementa la cobertura: una línea cubierta sin aserciones
 - Sin pruebas de carga ni de seguridad dinámica (DAST): fuera del alcance del reto; serían los siguientes pasos
   (k6/Gatling y OWASP ZAP en el pipeline).
 - El almacenamiento en memoria se pierde al reiniciar: aceptable para el reto, no para producción.
+- 2 mutantes sobrevivientes de PIT en `CorrelationIdFilter` (aritmética de `durationMs`): ese valor solo se
+  escribe en el log de acceso y no afecta ninguna respuesta. Matarlos exigiría pruebas acopladas al reloj y al
+  formato del log, con más costo de mantenimiento que valor. Cualquier otro mutante sobreviviente se revisa:
+  el del `title` de los errores de validación reveló una aserción faltante y se cerró.
 
 ## 7. Cómo agregar una regla nueva
 

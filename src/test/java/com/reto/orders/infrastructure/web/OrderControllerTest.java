@@ -126,6 +126,7 @@ class OrderControllerTest {
                             .content("{\"cliente\":\"Juan\",\"productos\":[]}"))
                     .andExpect(status().isBadRequest())
                     .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                    .andExpect(jsonPath("$.title", is("Petición inválida")))
                     .andExpect(jsonPath("$.code", is("VALIDATION")))
                     .andExpect(jsonPath("$.errors[0].campo", is("productos")))
                     .andExpect(jsonPath("$.errors[0].mensaje", containsString("RN-01")));

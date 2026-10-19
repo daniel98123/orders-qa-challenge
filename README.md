@@ -1,6 +1,6 @@
 # Orders API · Reto Técnico QA Semi Senior
 
-[![CI](https://github.com/<usuario>/<repo>/actions/workflows/ci.yml/badge.svg)](https://github.com/<usuario>/<repo>/actions/workflows/ci.yml)
+[![CI](https://github.com/daniel98123/orders-qa-challenge/actions/workflows/ci.yml/badge.svg)](https://github.com/daniel98123/orders-qa-challenge/actions/workflows/ci.yml)
 
 API REST para la gestión de órdenes de compra con máquina de estados, construida con **calidad integrada en
 cada etapa**: reglas de negocio trazables (RN-01…RN-06), pirámide de pruebas, quality gates automáticos
@@ -154,8 +154,8 @@ Solo para levantar la aplicación basta con **Docker**; el resto se necesita par
 ### Paso 2 · Clonar el repositorio
 
 ```bash
-git clone https://github.com/<usuario>/<repo>.git
-cd <repo>
+git clone https://github.com/daniel98123/orders-qa-challenge.git
+cd orders-qa-challenge
 ```
 
 ### Paso 3 · Levantar la aplicación

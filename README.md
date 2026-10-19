@@ -132,38 +132,72 @@ riesgo completo están en **[docs/TEST_STRATEGY.md](docs/TEST_STRATEGY.md)**.
 
 ## 4. Cómo ejecutar la aplicación
 
-**Requisitos:** Java 17+ y Maven 3.9+ · Docker (con Compose v2) · Node 22+ (frontend/E2E) · Python 3.11+ (trazabilidad).
+### Paso 1 · Instalar los requisitos
 
-### Opción A · Docker (recomendada)
+| Herramienta | Versión | Para qué | Verificar con |
+|---|---|---|---|
+| Git | cualquiera | Clonar el repositorio | `git --version` |
+| Java (JDK) | 17 o superior | Compilar y probar la API | `java -version` |
+| Maven | 3.9 o superior | Build, pruebas, cobertura, PIT, Karate | `mvn -v` |
+| Docker Desktop | con Compose v2 | Contenedores de la API y el frontend | `docker compose version` |
+| Node.js | 22 o superior | Frontend y pruebas E2E | `node -v` |
+| Python | 3.11 o superior | Herramienta de trazabilidad (plus IA) | `python --version` |
+
+> **Windows:** con `winget` se instalan en un paso:
+> `winget install EclipseAdoptium.Temurin.17.JDK OpenJS.NodeJS.22 Python.Python.3.12 Docker.DockerDesktop`.
+> Maven no está en winget: descarga el zip de <https://maven.apache.org/download.cgi>, descomprímelo y agrega
+> su carpeta `bin` al `PATH`. Docker Desktop necesita WSL 2 (`wsl --install` como administrador y reiniciar).
+> Abre una **terminal nueva** después de instalar para que cargue el `PATH`.
+
+Solo para levantar la aplicación basta con **Docker**; el resto se necesita para ejecutar las pruebas.
+
+### Paso 2 · Clonar el repositorio
 
 ```bash
-# Solo la API (igual al ejemplo del reto)
+git clone https://github.com/<usuario>/<repo>.git
+cd <repo>
+```
+
+### Paso 3 · Levantar la aplicación
+
+**Opción A · Docker Compose (recomendada): API + frontend**
+
+```bash
+docker compose up -d --build --wait
+docker compose ps        # ambos contenedores deben aparecer como "healthy"
+```
+
+La primera vez tarda unos minutos (descarga imágenes y dependencias). Para detenerlo: `docker compose down`.
+
+**Opción B · Solo la API con Docker** (igual al ejemplo del reto)
+
+```bash
 docker build -t challenge-api .
 docker run -p 8080:8080 challenge-api
-
-# Stack completo: API (:8080) + frontend (:3000)
-docker compose up -d --build
 ```
 
-### Opción B · Local con Maven
+**Opción C · Sin Docker**
 
 ```bash
+# Terminal 1: API
 mvn spring-boot:run
-```
 
-### Frontend en modo desarrollo
-
-```bash
+# Terminal 2: frontend en modo desarrollo (proxy /api -> http://localhost:8080)
 cd frontend
 npm install
-npm run dev        # http://localhost:5173 (proxy /api -> http://localhost:8080)
+npm run dev
 ```
 
-| URL | Qué es |
+### Paso 4 · Verificar que funciona
+
+| URL | Qué debes ver |
 |---|---|
-| http://localhost:8080/swagger-ui.html | Documentación interactiva (OpenAPI) |
-| http://localhost:8080/actuator/health | Health check |
-| http://localhost:3000 | Frontend (con Docker Compose) |
+| http://localhost:8080/actuator/health | `{"status":"UP",...}` |
+| http://localhost:8080/swagger-ui.html | Documentación interactiva (OpenAPI) para probar los endpoints |
+| http://localhost:3000 | Frontend (opción A) · en la opción C es http://localhost:5173 |
+
+En el frontend puedes crear una orden, consultarla por id, avanzar su estado (Pagar → Enviar → Entregar),
+cancelarla y filtrar la lista por estado.
 
 ## 5. Uso de la API
 
@@ -205,16 +239,106 @@ solo acciones válidas):
 
 ## 6. Cómo ejecutar las pruebas
 
+Ejecuta los pasos en orden desde la raíz del repositorio. Es la misma secuencia que corre el pipeline;
+cada paso falla (`BUILD FAILURE` o código de salida ≠ 0) si no se cumple su quality gate.
+
+### Paso 1 · Unitarias, componente y cobertura (JaCoCo)
+
+```bash
+mvn test
+```
+
+- **Resultado esperado:** `Tests run: 130, Failures: 0`, `All coverage checks have been met.` y `BUILD SUCCESS`.
+- **Gate:** falla si la cobertura de líneas o de ramas es < 80 %.
+- **Reporte:** `target/site/jacoco/index.html`.
+
+### Paso 2 · Pruebas de aceptación con Karate
+
+```bash
+mvn verify
+```
+
+- Incluye el paso 1 y luego levanta la API en un puerto aleatorio y ejecuta los 29 escenarios Karate
+  (no necesitas tener la aplicación corriendo).
+- **Resultado esperado:** `scenarios: 29 | passed: 29 | failed: 0` y `BUILD SUCCESS`.
+- **Reporte:** `target/karate-reports/karate-summary.html`.
+- Solo los 4 escenarios obligatorios: `mvn verify "-Dkarate.options=--tags @obligatorio"`.
+
+### Paso 3 · Mutation testing (PIT)
+
+```bash
+mvn test-compile org.pitest:pitest-maven:mutationCoverage
+```
+
+- **Resultado esperado:** `Generated 88 mutations Killed 85 (97%)` y `BUILD SUCCESS` (tarda 1–2 minutos).
+- **Gate:** falla si el mutation score es < 70 %.
+- **Reporte:** `target/pit-reports/index.html`.
+
+### Paso 4 · Docker y smoke Karate contra el contenedor
+
+```bash
+docker compose up -d --build --wait
+mvn test-compile failsafe:integration-test failsafe:verify "-Dkarate.baseUrl=http://localhost:8080" "-Dkarate.options=--tags @smoke"
+```
+
+- **Resultado esperado:** `orders-api` y `orders-web` en estado `healthy` y `scenarios: 3 | passed: 3`.
+- Las comillas en los `-D...` son necesarias en PowerShell; en bash también funcionan.
+
+### Paso 5 · E2E con Playwright (requiere el paso 4 en ejecución)
+
+```bash
+cd e2e
+npm install
+npx playwright install chromium
+npx playwright test
+npx playwright show-report      # abre el reporte HTML
+cd ..
+```
+
+- **Resultado esperado:** `7 passed`.
+- Por defecto apunta a http://localhost:3000. Para otro ambiente: variable `E2E_BASE_URL`
+  (bash: `E2E_BASE_URL=http://localhost:5173 npx playwright test` · PowerShell:
+  `$env:E2E_BASE_URL='http://localhost:5173'; npx playwright test`).
+
+### Paso 6 · Trazabilidad de requisitos (plus IA)
+
+```bash
+python -m unittest discover -s ai-tools/traceability/tests
+python ai-tools/traceability/traceability.py --out target/traceability --fail-on-gaps
+```
+
+- **Resultado esperado:** `Ran 9 tests ... OK` y la matriz generada sin brechas en las reglas (código de salida 0).
+- **Gate:** falla si alguna regla RN-01…RN-06 no tiene pruebas en las capas requeridas.
+- **Reporte:** `target/traceability/traceability.md` (también `missing-scenarios.feature` con los esqueletos Karate).
+- En macOS/Linux usa `python3` si `python` no existe.
+
+### Paso 7 · Apagar el entorno
+
+```bash
+docker compose down
+```
+
+### Resumen de comandos
+
 | Qué | Comando | Reporte |
 |---|---|---|
 | Unitarias + componente + **gate de cobertura** | `mvn test` | `target/site/jacoco/index.html` |
 | Todo lo anterior + **Karate** | `mvn verify` | `target/karate-reports/karate-summary.html` |
 | **Mutation testing** (gate ≥ 70 %) | `mvn test-compile org.pitest:pitest-maven:mutationCoverage` | `target/pit-reports/index.html` |
-| Karate contra un ambiente desplegado | `mvn test-compile failsafe:integration-test failsafe:verify -Dkarate.baseUrl=http://localhost:8080` | ídem |
-| Solo escenarios obligatorios | `mvn verify "-Dkarate.options=--tags @obligatorio"` | ídem |
+| Karate contra un ambiente desplegado | `mvn test-compile failsafe:integration-test failsafe:verify "-Dkarate.baseUrl=http://localhost:8080"` | ídem |
 | **E2E Playwright** (requiere `docker compose up -d --build`) | `cd e2e && npm install && npx playwright install chromium && npx playwright test` | `e2e/playwright-report/index.html` |
 | **Trazabilidad** (gate) | `python ai-tools/traceability/traceability.py --fail-on-gaps` | `target/traceability/traceability.md` |
 | Pruebas de la herramienta de trazabilidad | `python -m unittest discover -s ai-tools/traceability/tests` | consola |
+
+### Problemas frecuentes
+
+| Síntoma | Solución |
+|---|---|
+| `Port 8080 is already in use` / el contenedor no arranca | Detén lo que use el puerto (otra instancia de la API o `docker compose down`) |
+| `docker: command not found` o error 500 del motor | Abre Docker Desktop y espera a que diga *Engine running*; en Windows verifica WSL 2 con `wsl --status` |
+| `mvn`/`java` no se reconocen | Abre una terminal nueva tras instalar; revisa `JAVA_HOME` y que `bin` de Maven esté en el `PATH` |
+| Un E2E falla por timeout justo después de levantar los contenedores | La JVM arranca en frío; ejecuta el smoke del paso 4 primero (calienta la API) y reintenta |
+| `python` abre la Microsoft Store (Windows) | Instala Python 3.12 y desactiva el alias en *Configuración → Aplicaciones → Alias de ejecución* |
 
 **Escenarios Karate** (`src/test/resources/karate/orders`):
 
@@ -251,17 +375,43 @@ Sonar no se integró para no depender de un servicio externo; los mismos umbrale
 
 ## 8. Evidencias
 
-> Las capturas se generan en la primera ejecución (local o en GitHub Actions); en
-> [docs/evidence/README.md](docs/evidence/README.md) está cómo obtener cada una.
+Resultados de una ejecución completa. En [docs/evidence/README.md](docs/evidence/README.md) está cómo
+regenerar cada captura; cada ejecución del pipeline publica además los reportes como artifacts
+(`api-reports`, `traceability`, `e2e-reports`).
 
-| Evidencia | Dónde |
-|---|---|
-| Cobertura (JaCoCo) | `docs/evidence/coverage.png` · artifact `api-reports` |
-| Mutation testing (PIT) | `docs/evidence/mutation.png` · artifact `api-reports` |
-| Karate | `docs/evidence/karate.png` · artifact `api-reports` |
-| E2E Playwright | `docs/evidence/playwright.png` · artifact `e2e-reports` |
-| Pipeline | `docs/evidence/pipeline.png` · pestaña Actions (resumen de quality gates) |
-| Matriz de trazabilidad | [docs/evidence/traceability.md](docs/evidence/traceability.md) |
+| Evidencia | Resultado | Gate |
+|---|---|---|
+| Cobertura (JaCoCo) | 100 % líneas · 95 % ramas | ≥ 80 % ✅ |
+| Mutation testing (PIT) | 97 % (85/88 mutantes eliminados) | ≥ 70 % ✅ |
+| Karate | 29/29 escenarios | 0 fallidos ✅ |
+| E2E Playwright | 7/7 flujos | 0 fallidos ✅ |
+| Trazabilidad | RN-01…RN-06 con pruebas en todas sus capas | sin brechas ✅ |
+
+**Cobertura (JaCoCo)**
+
+![Reporte de cobertura JaCoCo](docs/evidence/coverage.png)
+
+**Mutation testing (PIT)**
+
+![Reporte de mutation testing PIT](docs/evidence/mutation.png)
+
+**Pruebas de aceptación (Karate)**
+
+![Reporte de Karate](docs/evidence/karate.png)
+
+**E2E (Playwright)**
+
+![Reporte de Playwright](docs/evidence/playwright.png)
+
+**Frontend**
+
+![Frontend de órdenes de compra](docs/evidence/frontend.png)
+
+**Pipeline (GitHub Actions)**
+
+![Pipeline en verde](docs/evidence/pipeline.png)
+
+**Matriz de trazabilidad:** [docs/evidence/traceability.md](docs/evidence/traceability.md)
 
 ## 9. Plus de innovación: IA aplicada a la calidad
 

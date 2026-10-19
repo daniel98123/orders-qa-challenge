@@ -34,6 +34,9 @@
 
         <!-- Permite apuntar Karate a un ambiente externo: -Dkarate.baseUrl=http://localhost:8080 -->
         <skipITs>false</skipITs>
+
+        <!-- Valor por defecto de @{argLine} cuando JaCoCo no corre (p. ej. PIT): evita pasar "@{argLine}" literal a la JVM -->
+        <argLine></argLine>
     </properties>
 
     <dependencies>

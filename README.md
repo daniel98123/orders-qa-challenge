@@ -463,9 +463,21 @@ de un LLM.
 
 ## 10. Versionamiento
 
-- **Conventional Commits** (`feat:`, `test:`, `ci:`, `docs:`…), un commit por unidad lógica de trabajo.
-- Flujo sugerido: `main` protegida + ramas `feature/*` → Pull Request con el pipeline en verde como condición de merge.
-- Versionado semántico de la API (`1.0.0` en `pom.xml`).
+- **Conventional Commits** (`feat:`, `test:`, `ci:`, `docs:`, `build:`…), un commit por unidad lógica de trabajo;
+  cada corrección explica en el cuerpo del commit el porqué.
+- **`main` protegida** (reglas activas en GitHub):
+
+  | Regla | Efecto |
+  |---|---|
+  | Pull Request obligatorio | Nadie hace push directo a `main`, ni siquiera el administrador |
+  | Checks requeridos: los 3 jobs del pipeline | No se puede hacer merge si falla una prueba o un quality gate |
+  | Rama actualizada con `main` antes del merge | El pipeline valida exactamente lo que va a quedar en `main` |
+  | Historial lineal (solo *squash merge*) | Un commit por PR, con título Conventional Commit |
+  | Conversaciones resueltas, sin force push ni borrado | Los comentarios de revisión no se pierden y el historial no se reescribe |
+
+- **Flujo de trabajo:** rama `feature/*` (o `fix/*`, `docs/*`) → Pull Request → pipeline en verde → *squash merge*
+  → la rama se borra automáticamente.
+- **Versionado semántico** de la API (`1.0.0` en `pom.xml`).
 
 ## 11. Estructura del repositorio
 

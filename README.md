@@ -15,6 +15,34 @@ de trazabilidad asistida por IA.
 | **Entrega** | Docker multi-stage · docker-compose · GitHub Actions |
 | **Plus** | Frontend React + TypeScript · E2E Playwright · Plus IA (trazabilidad, escenarios faltantes, skill para IA) |
 
+## Cumplimiento del reto
+
+| Requisito | Estado | Dónde verlo |
+|---|---|---|
+| API REST (5 endpoints, RN-01…RN-06, manejo de errores) | ✅ | [§1](#1-descripción-de-la-solución) · [§5](#5-uso-de-la-api) · `src/main/java` |
+| Pruebas unitarias (éxito, negativos, validaciones, reglas, errores) | ✅ 130 pruebas | [§6](#6-cómo-ejecutar-las-pruebas) · `src/test/java` |
+| Cobertura ≥ 80 % líneas y ramas | ✅ 100 % / 95 % | [§8 Evidencias](#8-evidencias) |
+| Mutation testing ≥ 70 % | ✅ 98 % | [§8 Evidencias](#8-evidencias) |
+| Karate: 4 escenarios obligatorios + adicionales justificados | ✅ 4 + 25 | [§6](#6-cómo-ejecutar-las-pruebas) · `src/test/resources/karate` |
+| Docker: `Dockerfile` + `docker-compose.yml` | ✅ | [§4](#4-cómo-ejecutar-la-aplicación) |
+| CI/CD: checkout, build, unit, cobertura, PIT, Karate, imagen Docker | ✅ GitHub Actions | [§7](#7-pipeline-cicd-y-quality-gates) · `.github/workflows/ci.yml` |
+| Quality gate: falla si cobertura < 80 %, mutation < 70 % o hay pruebas fallidas | ✅ | [§7](#7-pipeline-cicd-y-quality-gates) |
+| README con descripción, arquitectura, decisiones, ejecución, pruebas y evidencias | ✅ | este documento |
+| *Plus* · Frontend (crear, consultar, actualizar estado, cancelar) | ✅ React | `frontend/` · [§8](#8-evidencias) |
+| *Plus* · E2E con Playwright (4 flujos sugeridos + 3 por riesgo) | ✅ 7/7 | `e2e/` · [§8](#8-evidencias) |
+| *Plus* · Innovación con IA (trazabilidad, escenarios faltantes, riesgo, generación de casos, skill) | ✅ | [§9](#9-plus-de-innovación-ia-aplicada-a-la-calidad) |
+
+| Lo que se valora | Cómo se aborda |
+|---|---|
+| Estrategia basada en riesgo | Matriz de riesgo por regla y escenarios priorizados: [docs/TEST_STRATEGY.md](docs/TEST_STRATEGY.md) |
+| Pirámide de pruebas | Unit → componente HTTP → Karate → E2E, con responsabilidades por capa ([TEST_STRATEGY §3](docs/TEST_STRATEGY.md#3-pirámide-de-pruebas)) |
+| Quality gates automáticos | JaCoCo, PIT y trazabilidad rompen el pipeline ([§7](#7-pipeline-cicd-y-quality-gates)) |
+| Versionamiento | Conventional Commits, un commit por unidad lógica ([§10](#10-versionamiento)) |
+| Legibilidad y mantenibilidad | Arquitectura hexagonal, dominio sin Spring e inmutable ([§2](#2-arquitectura)) |
+| Observabilidad | Correlation id, logs estructurados por evento, health check, reportes y artifacts ([§2](#2-arquitectura)) |
+| Uso responsable de IA | Herramientas deterministas en los gates; la IA solo propone y una persona revisa ([§9](#9-plus-de-innovación-ia-aplicada-a-la-calidad)) |
+| Justificación de decisiones | [§3](#3-decisiones-técnicas) y ambigüedades del enunciado en [TEST_STRATEGY §5](docs/TEST_STRATEGY.md#5-decisiones-sobre-ambigüedades-del-enunciado) |
+
 ---
 
 ## Contenido
@@ -270,7 +298,7 @@ mvn verify
 mvn test-compile org.pitest:pitest-maven:mutationCoverage
 ```
 
-- **Resultado esperado:** `Generated 88 mutations Killed 85 (97%)` y `BUILD SUCCESS` (tarda 1–2 minutos).
+- **Resultado esperado:** `Generated 88 mutations Killed 86 (98%)` y `BUILD SUCCESS` (tarda 1–2 minutos).
 - **Gate:** falla si el mutation score es < 70 %.
 - **Reporte:** `target/pit-reports/index.html`.
 
@@ -382,7 +410,7 @@ regenerar cada captura; cada ejecución del pipeline publica además los reporte
 | Evidencia | Resultado | Gate |
 |---|---|---|
 | Cobertura (JaCoCo) | 100 % líneas · 95 % ramas | ≥ 80 % ✅ |
-| Mutation testing (PIT) | 97 % (85/88 mutantes eliminados) | ≥ 70 % ✅ |
+| Mutation testing (PIT) | 98 % (86/88 mutantes eliminados; los 2 vivos están justificados en [TEST_STRATEGY](docs/TEST_STRATEGY.md#6-riesgo-residual-aceptado)) | ≥ 70 % ✅ |
 | Karate | 29/29 escenarios | 0 fallidos ✅ |
 | E2E Playwright | 7/7 flujos | 0 fallidos ✅ |
 | Trazabilidad | RN-01…RN-06 con pruebas en todas sus capas | sin brechas ✅ |

@@ -1,0 +1,92 @@
+:root {
+  --bg: #f4f1ea;
+  --surface: #fffdf8;
+  --ink: #1d1f1c;
+  --muted: #6b6a63;
+  --line: #ddd7c9;
+  --accent: #1f5f4a;
+  --accent-ink: #ffffff;
+  --danger: #a63a2b;
+  --ok-bg: #e3f1e8;
+  --err-bg: #f8e3df;
+  --radius: 10px;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+
+.page { max-width: 1180px; margin: 0 auto; padding: 32px 20px 64px; }
+
+.masthead {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 16px;
+  border-bottom: 2px solid var(--ink); padding-bottom: 16px; margin-bottom: 24px;
+}
+.eyebrow { margin: 0; text-transform: uppercase; letter-spacing: .12em; font-size: 12px; color: var(--muted); }
+h1 { margin: 4px 0 0; font-size: 34px; letter-spacing: -.02em; }
+h2 { margin: 0 0 16px; font-size: 18px; }
+.docs-link { color: var(--accent); font-weight: 600; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+.panel-wide { grid-column: 1 / -1; }
+.panel-head { display: flex; justify-content: space-between; align-items: center; }
+@media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+
+label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+label.inline { flex-direction: row; align-items: center; gap: 8px; margin: 0; }
+input, select {
+  font: inherit; font-weight: 400; padding: 8px 10px; border: 1px solid var(--line);
+  border-radius: 6px; background: #fff; min-width: 0;
+}
+input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.productos { display: grid; gap: 10px; margin-bottom: 12px; }
+.producto {
+  display: grid; grid-template-columns: 1fr 90px 140px auto; gap: 10px; align-items: end;
+  border: 1px dashed var(--line); border-radius: 8px; padding: 10px 12px 0;
+}
+.producto legend { font-size: 12px; color: var(--muted); padding: 0 4px; }
+@media (max-width: 520px) { .producto { grid-template-columns: 1fr 1fr; } }
+
+button {
+  font: inherit; font-weight: 600; cursor: pointer; border: 1px solid var(--accent);
+  background: var(--accent); color: var(--accent-ink); border-radius: 6px; padding: 9px 14px;
+}
+button:disabled { opacity: .55; cursor: progress; }
+button.secondary { background: transparent; color: var(--accent); }
+button.danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+button.small { padding: 5px 10px; font-size: 13px; }
+button.link { background: none; border: none; color: inherit; padding: 4px 6px; margin-bottom: 12px; text-decoration: underline; }
+
+.form-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 8px; flex-wrap: wrap; }
+.estimado { font-size: 13px; color: var(--muted); }
+
+.search { display: flex; gap: 8px; }
+.search input { flex: 1; }
+.detalle { display: grid; grid-template-columns: 90px 1fr; gap: 6px 12px; margin-top: 18px; font-size: 14px; }
+.detalle dt { color: var(--muted); }
+.detalle dd { margin: 0; }
+
+.tabla-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+th, td { padding: 10px 8px; border-bottom: 1px solid var(--line); }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.mono { font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; font-size: 12px; }
+.acciones { display: flex; gap: 6px; flex-wrap: wrap; }
+.muted, .vacio { color: var(--muted); }
+
+.insignia { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .04em; }
+.insignia-creada { background: #e8e6df; color: #3f3e39; }
+.insignia-pagada { background: #dfeaf6; color: #1d4a7a; }
+.insignia-enviada { background: #f6ecd6; color: #7a5310; }
+.insignia-entregada { background: #dcefe4; color: #1f5f4a; }
+.insignia-cancelada { background: #f4dcd7; color: #8a2f22; }
+
+.aviso { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 8px; margin-bottom: 18px; }
+.aviso button { margin: 0; }
+.aviso-ok { background: var(--ok-bg); }
+.aviso-error { background: var(--err-bg); color: var(--danger); }

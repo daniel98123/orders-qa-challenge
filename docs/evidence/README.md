@@ -8,6 +8,7 @@ Esta carpeta guarda las capturas que el README enlaza. Se generan al ejecutar el
 | `mutation.png` | `mvn test-compile org.pitest:pitest-maven:mutationCoverage` → abrir `target/pit-reports/index.html` |
 | `karate.png` | `mvn verify` → abrir `target/karate-reports/karate-summary.html` |
 | `playwright.png` | `docker compose up -d --build` y `cd e2e && npx playwright test && npx playwright show-report` |
+| `frontend.png` | `docker compose up -d --build` → abrir `http://localhost:3000` |
 | `pipeline.png` | Pestaña **Actions** del repositorio en GitHub → ejecución en verde con el resumen de Quality Gates |
 | `traceability.md` | `python ai-tools/traceability/traceability.py --out docs/evidence` |
 

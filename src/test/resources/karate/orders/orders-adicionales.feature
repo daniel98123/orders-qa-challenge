@@ -176,8 +176,9 @@ Feature: Órdenes de compra - escenarios adicionales basados en riesgo
   # Observabilidad: el correlation id permite cruzar una respuesta con los logs del servidor.
   @adicional @observabilidad
   Scenario: La API devuelve el X-Correlation-Id recibido
+    # configure headers (no "header") porque karate-config.js ya fija un X-Correlation-Id global que tiene prioridad
+    * configure headers = { 'X-Correlation-Id': 'karate-trace-001' }
     Given path 'orders'
-    And header X-Correlation-Id = 'karate-trace-001'
     When method get
     Then status 200
     And match karate.response.header('X-Correlation-Id') == 'karate-trace-001'

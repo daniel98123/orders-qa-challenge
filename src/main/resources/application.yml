@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: orders-api
+  jackson:
+    # Propiedades desconocidas (p. ej. un "total" enviado por el cliente) se ignoran: el total lo calcula el servidor (RN-03)
+    deserialization:
+      fail-on-unknown-properties: false
+
+server:
+  port: ${PORT:8080}
+  # Respeta X-Forwarded-* (p. ej. X-Forwarded-Prefix=/api desde nginx) para que Swagger UI funcione tras el proxy
+  forward-headers-strategy: framework
+  error:
+    include-stacktrace: never
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  pattern:
+    # correlationId en cada línea para trazar una petición de punta a punta
+    level: "%5p [corr=%X{correlationId:-none}]"
+  level:
+    com.reto.orders: INFO

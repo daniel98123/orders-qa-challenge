@@ -1,0 +1,19 @@
+# Java / Maven
+target/
+*.class
+*.log
+
+# Node
+node_modules/
+dist/
+e2e/test-results/
+e2e/playwright-report/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Secretos
+.env

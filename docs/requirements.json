@@ -1,0 +1,47 @@
+{
+  "_comment": "Catálogo de requisitos para la matriz de trazabilidad (ai-tools/traceability). impacto/probabilidad: 1=bajo, 2=medio, 3=alto. capas_requeridas: capas de la pirámide que DEBEN tener al menos una prueba (gate del pipeline).",
+  "reglas": [
+    {
+      "id": "RN-01",
+      "descripcion": "Una orden debe contener al menos un producto.",
+      "impacto": 2,
+      "probabilidad": 2,
+      "capas_requeridas": ["unit", "acceptance"]
+    },
+    {
+      "id": "RN-02",
+      "descripcion": "La cantidad de cada producto debe ser mayor que cero.",
+      "impacto": 3,
+      "probabilidad": 2,
+      "capas_requeridas": ["unit", "acceptance"]
+    },
+    {
+      "id": "RN-03",
+      "descripcion": "El valor total de la orden debe calcularse automáticamente.",
+      "impacto": 3,
+      "probabilidad": 3,
+      "capas_requeridas": ["unit", "acceptance", "e2e"]
+    },
+    {
+      "id": "RN-04",
+      "descripcion": "Una orden entregada no puede ser cancelada.",
+      "impacto": 3,
+      "probabilidad": 2,
+      "capas_requeridas": ["unit", "acceptance", "e2e"]
+    },
+    {
+      "id": "RN-05",
+      "descripcion": "Una orden no puede ser enviada si no ha sido pagada.",
+      "impacto": 3,
+      "probabilidad": 3,
+      "capas_requeridas": ["unit", "acceptance", "e2e"]
+    },
+    {
+      "id": "RN-06",
+      "descripcion": "No se deben permitir transiciones inválidas de estado.",
+      "impacto": 3,
+      "probabilidad": 3,
+      "capas_requeridas": ["unit", "acceptance"]
+    }
+  ]
+}

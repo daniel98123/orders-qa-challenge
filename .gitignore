@@ -17,3 +17,7 @@ e2e/playwright-report/
 
 # Secretos
 .env
+
+# Python
+__pycache__/
+*.pyc

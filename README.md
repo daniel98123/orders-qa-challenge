@@ -20,7 +20,7 @@ de trazabilidad asistida por IA.
 | Requisito | Estado | Dónde verlo |
 |---|---|---|
 | API REST (5 endpoints, RN-01…RN-06, manejo de errores) | ✅ | [§1](#1-descripción-de-la-solución) · [§5](#5-uso-de-la-api) · `src/main/java` |
-| Pruebas unitarias (éxito, negativos, validaciones, reglas, errores) | ✅ 130 pruebas | [§6](#6-cómo-ejecutar-las-pruebas) · `src/test/java` |
+| Pruebas unitarias (éxito, negativos, validaciones, reglas, errores) | ✅ 131 pruebas | [§6](#6-cómo-ejecutar-las-pruebas) · `src/test/java` |
 | Cobertura ≥ 80 % líneas y ramas | ✅ 100 % / 95 % | [§8 Evidencias](#8-evidencias) |
 | Mutation testing ≥ 70 % | ✅ 98 % | [§8 Evidencias](#8-evidencias) |
 | Karate: 4 escenarios obligatorios + adicionales justificados | ✅ 4 + 25 | [§6](#6-cómo-ejecutar-las-pruebas) · `src/test/resources/karate` |
@@ -29,7 +29,7 @@ de trazabilidad asistida por IA.
 | Quality gate: falla si cobertura < 80 %, mutation < 70 % o hay pruebas fallidas | ✅ | [§7](#7-pipeline-cicd-y-quality-gates) |
 | README con descripción, arquitectura, decisiones, ejecución, pruebas y evidencias | ✅ | este documento |
 | *Plus* · Frontend (crear, consultar, actualizar estado, cancelar) | ✅ React | `frontend/` · [§8](#8-evidencias) |
-| *Plus* · E2E con Playwright (4 flujos sugeridos + 3 por riesgo) | ✅ 7/7 | `e2e/` · [§8](#8-evidencias) |
+| *Plus* · E2E con Playwright (4 flujos sugeridos + 5 por riesgo) | ✅ 9/9 | `e2e/` · [§8](#8-evidencias) |
 | *Plus* · Innovación con IA (trazabilidad, escenarios faltantes, riesgo, generación de casos, skill) | ✅ | [§9](#9-plus-de-innovación-ia-aplicada-a-la-calidad) |
 
 | Lo que se valora | Cómo se aborda |
@@ -276,7 +276,7 @@ cada paso falla (`BUILD FAILURE` o código de salida ≠ 0) si no se cumple su q
 mvn test
 ```
 
-- **Resultado esperado:** `Tests run: 130, Failures: 0`, `All coverage checks have been met.` y `BUILD SUCCESS`.
+- **Resultado esperado:** `Tests run: 131, Failures: 0`, `All coverage checks have been met.` y `BUILD SUCCESS`.
 - **Gate:** falla si la cobertura de líneas o de ramas es < 80 %.
 - **Reporte:** `target/site/jacoco/index.html`.
 
@@ -298,7 +298,7 @@ mvn verify
 mvn test-compile org.pitest:pitest-maven:mutationCoverage
 ```
 
-- **Resultado esperado:** `Generated 88 mutations Killed 86 (98%)` y `BUILD SUCCESS` (tarda 1–2 minutos).
+- **Resultado esperado:** `Generated 97 mutations Killed 95 (98%)` y `BUILD SUCCESS` (tarda 1–2 minutos).
 - **Gate:** falla si el mutation score es < 70 %.
 - **Reporte:** `target/pit-reports/index.html`.
 
@@ -323,7 +323,7 @@ npx playwright show-report      # abre el reporte HTML
 cd ..
 ```
 
-- **Resultado esperado:** `7 passed`.
+- **Resultado esperado:** `9 passed`.
 - Por defecto apunta a http://localhost:3000. Para otro ambiente: variable `E2E_BASE_URL`
   (bash: `E2E_BASE_URL=http://localhost:5173 npx playwright test` · PowerShell:
   `$env:E2E_BASE_URL='http://localhost:5173'; npx playwright test`).
@@ -378,7 +378,7 @@ docker compose down
   listado con filtro y propagación del correlation id.
 
 **Pirámide** (detalle en [docs/TEST_STRATEGY.md](docs/TEST_STRATEGY.md#3-pirámide-de-pruebas)):
-≈ 100 ejecuciones unitarias · 28 de componente HTTP · 29 escenarios Karate · 7 flujos E2E.
+≈ 100 ejecuciones unitarias · 28 de componente HTTP · 29 escenarios Karate · 9 flujos E2E.
 
 ## 7. Pipeline CI/CD y quality gates
 
@@ -410,9 +410,9 @@ regenerar cada captura; cada ejecución del pipeline publica además los reporte
 | Evidencia | Resultado | Gate |
 |---|---|---|
 | Cobertura (JaCoCo) | 100 % líneas · 95 % ramas | ≥ 80 % ✅ |
-| Mutation testing (PIT) | 98 % (86/88 mutantes eliminados; los 2 vivos están justificados en [TEST_STRATEGY](docs/TEST_STRATEGY.md#6-riesgo-residual-aceptado)) | ≥ 70 % ✅ |
+| Mutation testing (PIT) | 98 % (95/97 mutantes eliminados; los 2 vivos están justificados en [TEST_STRATEGY](docs/TEST_STRATEGY.md#6-riesgo-residual-aceptado)) | ≥ 70 % ✅ |
 | Karate | 29/29 escenarios | 0 fallidos ✅ |
-| E2E Playwright | 7/7 flujos | 0 fallidos ✅ |
+| E2E Playwright | 9/9 flujos | 0 fallidos ✅ |
 | Trazabilidad | RN-01…RN-06 con pruebas en todas sus capas | sin brechas ✅ |
 
 **Cobertura (JaCoCo)**

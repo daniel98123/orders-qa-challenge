@@ -25,6 +25,10 @@ export default function App() {
   const [filtro, setFiltro] = useState<Estado | ''>('');
   const [aviso, setAviso] = useState<Aviso>(null);
   const [cargando, setCargando] = useState(false);
+  // "vez" cambia en cada clic para volver a consultar aunque se elija la misma orden
+  const [seleccion, setSeleccion] = useState<{ id: string; vez: number } | null>(null);
+
+  const mostrarError = useCallback((texto: string) => setAviso({ tipo: 'error', texto }), []);
 
   const recargar = useCallback(async () => {
     try {
@@ -95,7 +99,7 @@ export default function App() {
 
         <section className="panel">
           <h2>Consultar orden</h2>
-          <ConsultaOrden onError={(texto) => setAviso({ tipo: 'error', texto })} />
+          <ConsultaOrden seleccion={seleccion} onError={mostrarError} />
         </section>
 
         <section className="panel panel-wide">
@@ -117,7 +121,12 @@ export default function App() {
               </select>
             </label>
           </div>
-          <TablaOrdenes ordenes={ordenes} deshabilitado={cargando} onCambiarEstado={cambiarEstado} />
+          <TablaOrdenes
+            ordenes={ordenes}
+            deshabilitado={cargando}
+            onCambiarEstado={cambiarEstado}
+            onVer={(id) => setSeleccion((previa) => ({ id, vez: (previa?.vez ?? 0) + 1 }))}
+          />
         </section>
       </main>
     </div>
@@ -232,18 +241,39 @@ function FormularioOrden({
   );
 }
 
-function ConsultaOrden({ onError }: { onError: (texto: string) => void }) {
+function ConsultaOrden({
+  seleccion,
+  onError,
+}: {
+  seleccion: { id: string; vez: number } | null;
+  onError: (texto: string) => void;
+}) {
   const [id, setId] = useState('');
   const [orden, setOrden] = useState<Orden | null>(null);
 
-  const consultar = async (evento: FormEvent) => {
-    evento.preventDefault();
-    setOrden(null);
-    try {
-      setOrden(await api.consultar(id.trim()));
-    } catch (error) {
-      onError(mensajeDeError(error));
+  const buscar = useCallback(
+    async (valor: string) => {
+      setOrden(null);
+      try {
+        setOrden(await api.consultar(valor));
+      } catch (error) {
+        onError(mensajeDeError(error));
+      }
+    },
+    [onError],
+  );
+
+  // Clic en el id de la tabla: muestra el id completo en el buscador y consulta la orden
+  useEffect(() => {
+    if (seleccion) {
+      setId(seleccion.id);
+      void buscar(seleccion.id);
     }
+  }, [seleccion, buscar]);
+
+  const consultar = (evento: FormEvent) => {
+    evento.preventDefault();
+    void buscar(id.trim());
   };
 
   return (
@@ -286,10 +316,12 @@ function TablaOrdenes({
   ordenes,
   deshabilitado,
   onCambiarEstado,
+  onVer,
 }: {
   ordenes: Orden[];
   deshabilitado: boolean;
   onCambiarEstado: (orden: Orden, destino: Estado) => void;
+  onVer: (id: string) => void;
 }) {
   if (ordenes.length === 0) {
     return <p className="vacio" data-testid="empty-list">No hay órdenes para mostrar.</p>;
@@ -310,8 +342,16 @@ function TablaOrdenes({
         <tbody>
           {ordenes.map((orden) => (
             <tr key={orden.id} data-testid="order-row" data-order-id={orden.id}>
-              <td className="mono" title={orden.id}>
-                {orden.id.slice(0, 8)}
+              <td>
+                <button
+                  type="button"
+                  className="link id-link"
+                  data-testid="row-id"
+                  title={`Ver detalle de ${orden.id}`}
+                  onClick={() => onVer(orden.id)}
+                >
+                  {orden.id.slice(0, 8)}
+                </button>
               </td>
               <td data-testid="row-customer">{orden.cliente}</td>
               <td>{orden.productos.length}</td>

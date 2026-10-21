@@ -41,6 +41,27 @@ test.describe('Gestión de órdenes de compra (E2E)', () => {
     await expect(detalle.getByTestId('detail-total')).toContainText('200.000');
   });
 
+  // Riesgo de usabilidad: la tabla muestra el id abreviado; el usuario debe poder ver el detalle sin copiar el UUID.
+  test('Consultar una orden desde la tabla con un clic en su id', async ({ page, request }) => {
+    const cliente = uniqueCustomer();
+    const orden = await createOrderViaApi(request, cliente);
+    await page.reload();
+
+    await orderRow(page, cliente).getByTestId('row-id').click();
+
+    const detalle = page.getByTestId('order-detail');
+    await expect(detalle.getByTestId('detail-customer')).toHaveText(cliente);
+    await expect(page.getByTestId('search-input')).toHaveValue(orden.id);
+  });
+
+  test('Consultar con un id incompleto explica que se espera un UUID', async ({ page }) => {
+    await page.getByTestId('search-input').fill('1ae80ede');
+    await page.getByTestId('search-button').click();
+
+    await expect(page.getByTestId('error-message')).toContainText('INVALID_PARAMETER');
+    await expect(page.getByTestId('error-message')).toContainText('UUID completo');
+  });
+
   test('Consultar una orden inexistente muestra el error de la API', async ({ page }) => {
     await page.getByTestId('search-input').fill('00000000-0000-0000-0000-000000000000');
     await page.getByTestId('search-button').click();

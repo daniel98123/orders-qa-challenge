@@ -238,9 +238,14 @@ class OrderControllerTest {
         @Test
         @DisplayName("400 si el id no es un UUID")
         void invalidId() throws Exception {
-            mvc.perform(get("/orders/{id}", "no-es-uuid"))
+            mvc.perform(get("/orders/{id}", "1ae80ede"))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.code", is("HTTP_400")));
+                    .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
+                    .andExpect(jsonPath("$.code", is("INVALID_PARAMETER")))
+                    .andExpect(jsonPath("$.title", is("Parámetro inválido")))
+                    .andExpect(jsonPath("$.detail", containsString("'1ae80ede' no es válido para 'id'")))
+                    .andExpect(jsonPath("$.detail", containsString("UUID completo")))
+                    .andExpect(jsonPath("$.correlationId", notNullValue()));
         }
 
         @Test
@@ -269,7 +274,10 @@ class OrderControllerTest {
         @DisplayName("400 si el filtro de estado no existe")
         void invalidStatusFilter() throws Exception {
             mvc.perform(get("/orders").param("estado", "PERDIDA"))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code", is("INVALID_PARAMETER")))
+                    .andExpect(jsonPath("$.detail", containsString("'PERDIDA' no es válido para 'estado'")))
+                    .andExpect(jsonPath("$.detail", containsString("[CREADA, PAGADA, ENVIADA, ENTREGADA, CANCELADA]")));
         }
     }
 

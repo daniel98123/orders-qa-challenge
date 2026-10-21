@@ -10,6 +10,7 @@ import com.reto.orders.domain.exception.OrderNotPaidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -26,6 +27,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Traduce errores a respuestas RFC 7807 (application/problem+json) con:
@@ -108,7 +110,34 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.badRequest().body(problem);
     }
 
-    /** Agrega code/correlationId a los errores estándar de Spring MVC (405, 415, tipo de parámetro, etc.). */
+    /**
+     * Parámetro de ruta o query con un tipo inválido (id que no es UUID, estado inexistente en el filtro).
+     * El valor recibido no se escribe en el log para evitar inyección de logs (CWE-117).
+     */
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers,
+                                                        HttpStatusCode status, WebRequest request) {
+        String parametro = ex.getPropertyName();
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                "El valor '" + ex.getValue() + "' no es válido para '" + parametro + "': "
+                        + valorEsperado(ex.getRequiredType()));
+        problem.setTitle("Parámetro inválido");
+        enrich(problem, "INVALID_PARAMETER");
+        log.warn("event=invalid_parameter parameter={}", parametro);
+        return ResponseEntity.badRequest().body(problem);
+    }
+
+    static String valorEsperado(Class<?> tipo) {
+        if (UUID.class.equals(tipo)) {
+            return "debe ser un UUID completo, p. ej. 3f2b8c1e-7a4d-4e8f-9b21-6c0d5e4f3a12";
+        }
+        if (tipo != null && tipo.isEnum()) {
+            return "valores permitidos " + Arrays.toString(tipo.getEnumConstants());
+        }
+        return "tipo de dato incorrecto";
+    }
+
+    /** Agrega code/correlationId a los errores estándar de Spring MVC (405, 415, etc.). */
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
                                                              HttpStatusCode statusCode, WebRequest request) {

@@ -38,7 +38,7 @@ Riesgos técnicos identificados y cómo se cubren:
 ## 3. Pirámide de pruebas
 
 ```
-                 ▲   E2E Playwright ............ 7 flujos de UI (stack Docker completo)
+                 ▲   E2E Playwright ............ 9 flujos de UI (stack Docker completo)
                 ▲▲▲  Aceptación Karate ......... 29 escenarios sobre HTTP real
              ▲▲▲▲▲▲▲ Componente (@WebMvcTest) .. 28 casos de contrato HTTP y errores
        ▲▲▲▲▲▲▲▲▲▲▲▲▲ Unitarias ................. 50 métodos (+ parametrizados ≈ 100 ejecuciones)

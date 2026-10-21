@@ -142,6 +142,9 @@ Feature: Órdenes de compra - escenarios adicionales basados en riesgo
     Given path 'orders', 'no-es-un-uuid'
     When method get
     Then status 400
+    And match response == errorSchema
+    And match response.code == 'INVALID_PARAMETER'
+    And match response.detail contains 'UUID completo'
 
   @adicional @errores
   Scenario: Un estado desconocido en el PATCH responde 400

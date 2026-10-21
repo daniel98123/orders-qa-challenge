@@ -60,6 +60,7 @@ button.secondary { background: transparent; color: var(--accent); }
 button.danger { background: transparent; color: var(--danger); border-color: var(--danger); }
 button.small { padding: 5px 10px; font-size: 13px; }
 button.link { background: none; border: none; color: inherit; padding: 4px 6px; margin-bottom: 12px; text-decoration: underline; }
+button.id-link { margin: 0; padding: 0; color: var(--accent); font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; font-size: 12px; font-weight: 400; }
 
 .form-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 8px; flex-wrap: wrap; }
 .estimado { font-size: 13px; color: var(--muted); }

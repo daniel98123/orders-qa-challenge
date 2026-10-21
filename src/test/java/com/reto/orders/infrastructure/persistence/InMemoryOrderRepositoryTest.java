@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 import static com.reto.orders.support.TestData.FIXED_CLOCK;
 import static com.reto.orders.support.TestData.item;
@@ -61,13 +63,14 @@ class InMemoryOrderRepositoryTest {
     @Test
     @DisplayName("Con la misma fecha de creación el orden es determinista (desempate por id)")
     void findAllTieBreakById() {
-        Order first = TestData.newOrder();
-        Order second = TestData.newOrder();
-        repository.save(first);
-        repository.save(second);
+        // 20 órdenes con la misma fecha: con solo 2, el orden interno del mapa coincidía con el
+        // esperado por azar ~50 % de las veces y la prueba no detectaba que faltara el desempate.
+        List<Order> orders = IntStream.range(0, 20).mapToObj(i -> TestData.newOrder()).toList();
+        orders.forEach(repository::save);
 
-        List<Order> expected = first.getId().toString().compareTo(second.getId().toString()) < 0
-                ? List.of(first, second) : List.of(second, first);
+        List<Order> expected = orders.stream()
+                .sorted(Comparator.comparing(order -> order.getId().toString()))
+                .toList();
         assertThat(repository.findAll()).containsExactlyElementsOf(expected);
     }
 
